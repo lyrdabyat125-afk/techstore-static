@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TechStore — Phones, Laptops & Gear</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="navbar" class="navbar"></div>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-visual">
+      <div class="hero-phone">
+        <div class="hero-screen">
+          <div class="hero-bar pulse" style="width:70%"></div>
+          <div class="hero-bar short"></div>
+          <div class="hero-bar" style="width:85%"></div>
+          <div class="hero-bar short"></div>
+        </div>
+      </div>
+      <div class="hero-orbit o1"></div>
+      <div class="hero-orbit o2"></div>
+      <div class="hero-orbit o3"></div>
+    </div>
+    <div class="eyebrow">Read the spec sheet, not the ad copy</div>
+    <h1>Phones, laptops &amp; <span class="grad-text">gear worth the price tag</span></h1>
+    <p>Curated electronics with honest specs, fast shipping, and no filler.</p>
+    <a href="products.html" class="btn btn-primary">Shop the catalog</a>
+  </div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track" id="marquee-track"></div>
+</div>
+
+<section class="section container">
+  <div class="section-head">
+    <h2>Shop by category</h2>
+  </div>
+  <div class="grid" id="category-grid" style="grid-template-columns:repeat(6,1fr)"></div>
+</section>
+
+<section class="section container" style="padding-top:0">
+  <div class="feature-grid" id="feature-grid"></div>
+</section>
+
+<section class="section container">
+  <div class="section-head">
+    <h2>Featured products</h2>
+    <a href="products.html">View all</a>
+  </div>
+  <div class="grid" id="featured-grid"></div>
+</section>
+
+<div class="container">
+  <div class="stat-grid">
+    <div><div class="stat-num" id="stat1">0</div><div class="stat-label">Orders shipped</div></div>
+    <div><div class="stat-num" id="stat2">0</div><div class="stat-label">Products in catalog</div></div>
+    <div><div class="stat-num" id="stat3">0</div><div class="stat-label">On-time delivery</div></div>
+    <div><div class="stat-num" id="stat4">0</div><div class="stat-label">Customer support</div></div>
+  </div>
+</div>
+
+<section class="section container">
+  <div class="promo-banner">
+    <h2>Trade in your old device, save on the new one</h2>
+    <p>Get an instant quote at checkout and knock up to $400 off any phone or laptop.</p>
+    <a href="products.html" class="btn btn-primary">See eligible trade-ins</a>
+  </div>
+</section>
+
+<section class="section container">
+  <div class="section-head">
+    <h2>New arrivals</h2>
+    <a href="products.html">View all</a>
+  </div>
+  <div class="grid" id="new-arrivals-grid"></div>
+</section>
+
+<section class="section container">
+  <div class="section-head"><h2>What customers are saying</h2></div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr)" id="testimonials-grid"></div>
+</section>
+
+<section class="section container" style="max-width:760px">
+  <div class="section-head"><h2>Frequently asked questions</h2></div>
+  <div id="faq-list"></div>
+</section>
+
+<div id="footer"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  renderNavbar();
+  const brands = ['Apple', 'Samsung', 'Sony', 'ASUS', 'Razer', 'Logitech', 'DJI', 'Bose', 'LG', 'Dell', 'Lenovo'];
+  document.getElementById('marquee-track').innerHTML = brands.concat(brands).map((b) => `<span>${b}</span>`).join('');
+
+  document.querySelector('.hero-orbit.o1').innerHTML = CategoryIcon['gaming-laptops'];
+  document.querySelector('.hero-orbit.o2').innerHTML = CategoryIcon['headphones'];
+  document.querySelector('.hero-orbit.o3').innerHTML = CategoryIcon['smart-watches'];
+
+  document.getElementById('category-grid').innerHTML = CATEGORIES.map((c) => `
+    <a class="cat-tile" href="products.html?category=${c.slug}">
+      <img src="${CATEGORY_IMAGE[c.slug]}" alt="${c.name}" loading="lazy" />
+      <span class="cat-label">${c.name}</span>
+    </a>`).join('');
+
+  const features = [
+    { icon: Icon.checkCircle, title: 'Free 2-day shipping', desc: 'On every order, no minimum spend required.' },
+    { icon: Icon.check, title: '2-year warranty', desc: 'Every product ships with extended coverage.' },
+    { icon: Icon.cart, title: 'Secure checkout', desc: 'Encrypted payments, every time you buy.' },
+    { icon: Icon.user, title: '24/7 support', desc: 'Real humans, ready to help any time.' },
+  ];
+  document.getElementById('feature-grid').innerHTML = features.map((f) => `
+    <div class="feature-card">
+      <div class="feature-icon">${f.icon}</div>
+      <h3>${f.title}</h3>
+      <p>${f.desc}</p>
+    </div>`).join('');
+
+  document.getElementById('featured-grid').innerHTML = PRODUCTS.slice(0, 12).map(productCardHTML).join('');
+  document.getElementById('new-arrivals-grid').innerHTML = PRODUCTS.slice(12, 20).map(productCardHTML).join('');
+
+  const stats = [{ el: 'stat1', val: 48000, suffix: '+' }, { el: 'stat2', val: PRODUCTS.length, suffix: '' }, { el: 'stat3', val: 99, suffix: '%' }, { el: 'stat4', val: 24, suffix: '/7' }];
+  stats.forEach(({ el, val, suffix }) => {
+    const node = document.getElementById(el);
+    let current = 0;
+    const step = Math.max(1, Math.ceil(val / 40));
+    const timer = setInterval(() => {
+      current = Math.min(val, current + step);
+      node.textContent = current.toLocaleString() + suffix;
+      if (current >= val) clearInterval(timer);
+    }, 20);
+  });
+
+  const testimonials = [
+    { name: 'Priya N.', role: 'Software Engineer', rating: 5, quote: 'Ordered a laptop and a monitor together and both arrived a day early. Specs page had everything I needed.' },
+    { name: 'Marcus D.', role: 'Video Editor', rating: 5, quote: 'The camera gear section is genuinely useful — real specs instead of vague marketing lines.' },
+    { name: 'Elena R.', role: 'Competitive Gamer', rating: 4, quote: 'Picked up a new mouse and keyboard for tournament prep. Checkout was fast and simple.' },
+    { name: 'Daniel O.', role: 'Product Designer', rating: 5, quote: 'Trade-in credit made upgrading my laptop painless. Support answered my question in minutes.' },
+  ];
+  document.getElementById('testimonials-grid').innerHTML = testimonials.map((t) => `
+    <div class="card" style="padding:20px;gap:10px">
+      ${starRow(t.rating)}
+      <p style="font-size:14px;color:var(--ink-300);flex:1">&ldquo;${t.quote}&rdquo;</p>
+      <div style="border-top:1px solid var(--bg-700);padding-top:10px;font-size:13px">
+        <strong>${t.name}</strong> <span style="color:var(--ink-500)">· ${t.role}</span>
+      </div>
+    </div>`).join('');
+
+  const faqs = [
+    { q: 'How long does shipping take?', a: 'Most orders arrive within 2 business days. You will get a tracking link as soon as your order ships.' },
+    { q: 'What is your return policy?', a: 'You can return any unopened item within 30 days for a full refund, no questions asked.' },
+    { q: 'Do you offer trade-ins?', a: 'Yes — get an instant quote for your old phone or laptop at checkout and apply it directly to your order.' },
+    { q: 'Is checkout secure?', a: 'All payments are encrypted end-to-end and we never store your full card details.' },
+  ];
+  document.getElementById('faq-list').innerHTML = faqs.map((f, i) => `
+    <div class="faq-item" id="faq-${i}">
+      <div class="faq-q" onclick="document.getElementById('faq-${i}').classList.toggle('open')">
+        <span>${f.q}</span>${Icon.plus}
+      </div>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join('');
+
+  initScrollReveal();
+</script>
+</body>
+</html>

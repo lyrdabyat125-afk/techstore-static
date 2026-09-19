@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Account — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="navbar" class="navbar"></div>
+
+<div class="container" id="page-root"></div>
+
+<div id="footer"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  renderNavbar();
+  const user = getUser();
+  const root = document.getElementById('page-root');
+
+  if (!user) {
+    window.location.href = 'login.html';
+  } else {
+    const orders = JSON.parse(localStorage.getItem('techstore_orders') || '[]');
+    const STATUS_COLOR = { PENDING: 'neutral', PAID: 'signal', SHIPPED: 'signal', DELIVERED: 'brass' };
+
+    root.innerHTML = `
+      <h1 style="font-size:30px;margin:36px 0 4px">My Account</h1>
+      <p style="color:var(--ink-500);font-size:14px;margin-bottom:8px">${user.name} · ${user.email}</p>
+      <button class="btn btn-secondary" id="signout-btn" style="padding:8px 16px;font-size:12px;margin-bottom:32px">Sign out</button>
+
+      <h2 class="display" style="font-size:20px;margin-bottom:16px">Order history</h2>
+      <div id="orders-list"></div>`;
+
+    document.getElementById('signout-btn').onclick = signOutUser;
+
+    const listEl = document.getElementById('orders-list');
+    if (orders.length === 0) {
+      listEl.innerHTML = `<div class="empty-state">${Icon.boxOpen}<p style="color:var(--ink-100);font-weight:600">No orders yet</p><p style="font-size:13px">Your past orders will show up here.</p></div>`;
+    } else {
+      listEl.innerHTML = orders.map((o) => `
+        <div style="background:var(--graphite-800);border:1px solid var(--graphite-700);border-radius:10px;padding:20px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <p class="mono" style="font-size:14px">Order #${o.id}</p>
+              <p style="font-size:12px;color:var(--ink-500)">${new Date(o.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+            </div>
+            <span class="badge" style="position:static">${o.status}</span>
+          </div>
+          <div style="border-top:1px solid var(--graphite-700);margin-top:12px;padding-top:12px">
+            ${o.items.map((i) => `<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><a href="product.html?slug=${i.slug}" style="color:var(--ink-300)">${i.name} × ${i.qty}</a><span class="mono">${formatPrice(i.price * i.qty)}</span></div>`).join('')}
+          </div>
+          <div style="border-top:1px solid var(--graphite-700);margin-top:8px;padding-top:12px;display:flex;justify-content:space-between;font-weight:600">
+            <span>Total</span><span class="mono" style="color:var(--brass-400)">${formatPrice(o.total)}</span>
+          </div>
+        </div>`).join('');
+    }
+  }
+</script>
+</body>
+</html>

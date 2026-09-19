@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="navbar" class="navbar"></div>
+
+<div class="auth-box" id="auth-root"></div>
+
+<div id="footer"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  renderNavbar();
+  let mode = 'signin';
+
+  function renderAuth() {
+    const isSignup = mode === 'signup';
+    document.getElementById('auth-root').innerHTML = `
+      <h1 class="display" style="font-size:24px;margin-bottom:4px">${isSignup ? 'Create account' : 'Sign in'}</h1>
+      <p style="color:var(--ink-500);font-size:14px;margin-bottom:24px">
+        ${isSignup ? "Already have an account?" : "Don't have an account?"}
+        <a href="#" id="toggle-mode" style="color:var(--brass-400)">${isSignup ? 'Sign in' : 'Sign up'}</a>
+      </p>
+      <form id="auth-form" style="display:flex;flex-direction:column;gap:14px">
+        ${isSignup ? '<input class="input" id="f-name" required placeholder="Full name" />' : ''}
+        <input class="input" id="f-email" type="email" required placeholder="Email" value="demo@techstore.dev" />
+        <input class="input" id="f-password" type="password" required minlength="6" placeholder="Password" value="Demo123!" />
+        <button type="submit" class="btn btn-primary btn-full">${isSignup ? 'Create account' : 'Sign in'}</button>
+      </form>
+      <div class="demo-note">This is a portfolio demo — sign-in is simulated locally in your browser, no real account is created.</div>`;
+
+    document.getElementById('toggle-mode').addEventListener('click', (e) => {
+      e.preventDefault();
+      mode = isSignup ? 'signin' : 'signup';
+      renderAuth();
+    });
+
+    document.getElementById('auth-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('f-email').value;
+      const name = isSignup ? document.getElementById('f-name').value : email.split('@')[0];
+      signIn(name, email);
+      toast(isSignup ? 'Account created' : 'Welcome back');
+      window.location.href = 'account.html';
+    });
+  }
+
+  renderAuth();
+</script>
+</body>
+</html>

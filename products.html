@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Products — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="navbar" class="navbar"></div>
+
+<div class="container" style="padding-top:40px">
+  <h1 id="page-title" style="font-size:30px;margin:0">All Products</h1>
+  <p class="mono" id="result-count" style="color:var(--ink-500);font-size:12px;margin-top:6px"></p>
+
+  <div style="max-width:360px;margin-top:20px">
+    <input id="search-input" class="input" type="text" placeholder="Search products, brands..." />
+  </div>
+
+  <div class="filter-pills" id="filter-pills"></div>
+
+  <div class="grid" id="product-grid" style="margin-bottom:60px"></div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  renderNavbar(qs('category'));
+
+  const activeCategory = qs('category') || '';
+  const searchTerm = (qs('q') || '').toLowerCase();
+
+  document.getElementById('filter-pills').innerHTML = ['<span class="pill' + (!activeCategory ? ' active' : '') + '" onclick="location.href=\'products.html\'">All</span>']
+    .concat(CATEGORIES.map((c) => `<span class="pill ${activeCategory === c.slug ? 'active' : ''}" style="--cat-color:${CATEGORY_COLORS[c.slug]}" onclick="location.href='products.html?category=${c.slug}'">${c.name}</span>`))
+    .join('');
+
+  let results = PRODUCTS;
+  if (activeCategory) results = results.filter((p) => p.category === activeCategory);
+  if (searchTerm) results = results.filter((p) => p.name.toLowerCase().includes(searchTerm) || p.brand.toLowerCase().includes(searchTerm));
+
+  document.getElementById('page-title').textContent = searchTerm ? `Results for "${qs('q')}"` : (CATEGORIES.find((c) => c.slug === activeCategory)?.name || 'All Products');
+  document.getElementById('result-count').textContent = `${results.length} products`;
+
+  document.getElementById('product-grid').innerHTML = results.length
+    ? results.map(productCardHTML).join('')
+    : `<div style="grid-column:1/-1" class="empty-state">${Icon.cart}<p style="color:var(--ink-100);font-weight:600">No products found</p><p style="font-size:13px">Try a different category or search term.</p></div>`;
+
+  document.getElementById('search-input').value = qs('q') || '';
+  document.getElementById('search-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const val = e.target.value.trim();
+      window.location.href = val ? `products.html?q=${encodeURIComponent(val)}` : 'products.html';
+    }
+  });
+
+  initScrollReveal();
+</script>
+</body>
+</html>

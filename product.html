@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="page-title">Product — TechStore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="navbar" class="navbar"></div>
+
+<div class="container">
+  <div class="breadcrumb" id="breadcrumb"></div>
+
+  <div class="product-detail">
+    <div>
+      <div class="gallery-main" id="gallery-main"></div>
+    </div>
+
+    <div>
+      <div class="brand-label" id="p-brand"></div>
+      <h1 class="display" id="p-name" style="font-size:28px;margin:6px 0"></h1>
+      <div id="p-rating"></div>
+      <div style="margin:16px 0" id="p-price"></div>
+      <p id="p-stock" class="mono" style="color:var(--brass-400);font-size:12px;display:none"></p>
+      <p id="p-description" style="color:var(--ink-300)"></p>
+
+      <div style="margin:20px 0"><button class="btn btn-primary btn-full" id="add-to-cart-btn">Add to cart</button></div>
+
+      <div class="spec-table" id="spec-table" style="display:none">
+        <div class="spec-head">Spec sheet</div>
+        <div id="spec-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="reviews-section" style="display:none;max-width:640px;padding-bottom:40px">
+    <h2 class="display" style="font-size:20px">Customer reviews</h2>
+    <div id="reviews-list" style="margin-top:16px"></div>
+  </section>
+
+  <section style="padding-bottom:60px">
+    <h2 class="display" style="font-size:20px;margin-bottom:20px">You might also like</h2>
+    <div class="grid" id="related-grid"></div>
+  </section>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const product = getProduct(qs('slug'));
+  if (!product) {
+    document.querySelector('.container').innerHTML = `<div class="empty-state" style="margin:60px 0">${Icon.cart}<p style="color:var(--ink-100);font-weight:600">Product not found</p><a href="products.html" class="btn btn-primary" style="margin-top:16px">Back to catalog</a></div>`;
+  } else {
+    renderNavbar(product.category);
+    document.title = product.name + ' — TechStore';
+    document.getElementById('breadcrumb').innerHTML = `${CATEGORIES.find((c) => c.slug === product.category)?.name || ''} / <span style="color:var(--ink-300)">${product.name}</span>`;
+    document.getElementById('gallery-main').innerHTML = `<img src="${CATEGORY_IMAGE[product.category]}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover" />`;
+    document.getElementById('p-brand').textContent = product.brand;
+    document.getElementById('p-name').textContent = product.name;
+    document.getElementById('p-rating').innerHTML = starRow(product.rating, product.reviewCount);
+
+    const discount = product.compareAtPrice ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : 0;
+    document.getElementById('p-price').innerHTML = `<div class="price-row"><span class="price" style="font-size:24px">${formatPrice(product.price)}</span>${discount ? `<span class="compare-price">${formatPrice(product.compareAtPrice)}</span><span class="discount-badge">-${discount}%</span>` : ''}</div>`;
+
+    if (product.stock > 0 && product.stock <= 10) {
+      const stockEl = document.getElementById('p-stock');
+      stockEl.style.display = 'block';
+      stockEl.textContent = `Only ${product.stock} left in stock`;
+    }
+    document.getElementById('p-description').textContent = product.description;
+
+    const addBtn = document.getElementById('add-to-cart-btn');
+    if (product.stock <= 0) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Out of stock';
+      addBtn.classList.replace('btn-primary', 'btn-secondary');
+    } else {
+      addBtn.innerHTML = `${Icon.cart} Add to cart`;
+      addBtn.onclick = () => addToCart(product.id, 1);
+    }
+
+    if (product.specs) {
+      document.getElementById('spec-table').style.display = 'block';
+      document.getElementById('spec-rows').innerHTML = Object.entries(product.specs).map(([k, v]) => `<div class="spec-row"><span>${k}</span><span>${v}</span></div>`).join('');
+    }
+
+    const reviews = REVIEWS[product.id];
+    if (reviews && reviews.length) {
+      document.getElementById('reviews-section').style.display = 'block';
+      document.getElementById('reviews-list').innerHTML = reviews.map((r) => `
+        <div style="border-bottom:1px solid var(--graphite-700);padding-bottom:16px;margin-bottom:16px">
+          ${starRow(r.rating)}
+          <h4 style="margin:8px 0 4px">${r.title}</h4>
+          <p style="font-size:14px;color:var(--ink-300);margin:0 0 6px">${r.body}</p>
+          <p class="mono" style="font-size:11px;color:var(--ink-500)">${r.name}</p>
+        </div>`).join('');
+    }
+
+    document.getElementById('related-grid').innerHTML = getRelated(product).map(productCardHTML).join('');
+  }
+  initScrollReveal();
+</script>
+</body>
+</html>
